@@ -87,16 +87,19 @@ export default class Parser {
    * @return {Parser}
    */
   startsWith (value, partial = false) {
+    const handleResult = (partialValue) => {
+      if (partial) return Parser.result(partialValue)
+
+      if (partialValue === value) return Parser.result(value)
+
+      return Parser.zero()
+    }
+
     if (!value.length) return Parser.zero()
 
     return this.firstIs(value[0]).bind((head) =>
-            this.startsWith(value.slice(1)).bind((tail) => {
-              if (partial) return Parser.result(head+tail)
-
-              if (head+tail === value) return Parser.result(value)
-
-              return Parser.zero()
-            }, true))
+            this.startsWith(value.slice(1)).bind((tail) =>
+              handleResult(head+tail), true))
   }
 
   /**

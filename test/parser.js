@@ -32,6 +32,13 @@ describe('#parser', function () {
     Parser.item().parse([ 1, 2, 3 ]).values[0].should.equal(1)
   })
 
+  it('Should be able to map values', function () {
+    let parser = Parser.item()
+    parser.mapValues = (c) => c.toUpperCase()
+
+    parser.parse('asd').values[0].should.equal('A')
+  })
+
   describe('#bind', function () {
     it('Should bind two parsers', function () {
       let parser = Parser.item(),

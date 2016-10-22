@@ -23,6 +23,7 @@ export default class Parser {
     this.result = new Result()
     this.result = this.process(input)
 
+    //console.log(this.mapValues)
     if (this.mapValues) this.result.values = this.result.values.map(this.mapValues)
 
     return this.result

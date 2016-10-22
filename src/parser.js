@@ -86,11 +86,17 @@ export default class Parser {
    * Returns a parser to checks that the first items are equals to a given value
    * @return {Parser}
    */
-  startsWith (value) {
+  startsWith (value, partial = false) {
     if (!value.length) return Parser.zero()
 
-    return this.firstIs(value[0]).bind((_) =>
-            this.startsWith(value.slice(1)).bind((_) => Parser.result(value), true))
+    return this.firstIs(value[0]).bind((head) =>
+            this.startsWith(value.slice(1)).bind((tail) => {
+              if (partial) return Parser.result(head+tail)
+
+              if (head+tail === value) return Parser.result(value)
+
+              return Parser.zero()
+            }, true))
   }
 
   /**

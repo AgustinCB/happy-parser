@@ -114,18 +114,29 @@ describe('#parser', function () {
     res2.length.should.equal(0)
   })
 
-  it('Should check the first items', function () {
-    let parser = Parser.item().startsWith('AgustinCB'),
-      res = parser.parse('AgustinCB is awesome'),
-      res2 = parser.parse('and AgustinCB too')
-      //res2 = parser.parse('And AgustinCB too')
+  describe('#startsWith', function () {
+    it('Should check the first items', function () {
+      let parser = Parser.item().startsWith('AgustinCB'),
+        res = parser.parse('AgustinCB is awesome'),
+        res2 = parser.parse('And AgustinCB too')
 
-    console.log(res.entries())
-    console.log(res2.entries())
-    res.length.should.equal(1)
-    res.values[0].should.equal('AgustinCB')
+      res.length.should.equal(1)
+      res.values[0].should.equal('AgustinCB')
 
-    res2.length.should.equal(0)
+      res2.length.should.equal(0)
+    })
+
+    it('Should check the first items partially', function () {
+      let parser = Parser.item().startsWith('AgustinCB', true),
+        res = parser.parse('AgustinCB is awesome'),
+        res2 = parser.parse('And AgustinCB too')
+
+      res.length.should.equal(1)
+      res.values[0].should.equal('AgustinCB')
+
+      res2.length.should.equal(1)
+      res2.values[0].should.equal('A')
+    })
   })
 
   it('Should check for items separated by a parser', function () {

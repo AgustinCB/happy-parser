@@ -1,5 +1,5 @@
 {
-  "name": "node-parser-combinator",
+  "name": "jsparsec",
   "version": "1.0.0",
   "description": "NPM package boilerplate with tests and babel for ES2015",
   "main": "./lib/main",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AgustinCB/node-parser-combinator.git"
+    "url": "git+https://github.com/AgustinCB/jsparsec.git"
   },
   "keywords": [
     "nomads",
@@ -20,9 +20,9 @@
   "author": "AgustinCB",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/AgustinCB/node-parser-combinator/issues"
+    "url": "https://github.com/AgustinCB/jsparsec/issues"
   },
-  "homepage": "https://github.com/AgustinCB/node-parser-combinator#readme",
+  "homepage": "https://github.com/AgustinCB/jsparsec#readme",
   "devDependencies": {
     "babel-cli": "^6.14.0",
     "babel-core": "^6.14.0",

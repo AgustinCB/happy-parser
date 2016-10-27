@@ -32,6 +32,15 @@ describe('#parser', function () {
     Parser.item().parse([ 1, 2, 3 ]).values[0].should.equal(1)
   })
 
+  it('Should allow lazy parsers', function () {
+    let parser = Parser.lazy(() => parser1),
+      parser1 = Parser.item(),
+      res = parser1.parse('asd')
+
+    res.length.should.equal(1)
+    res.values[0].should.equal('a')
+  })
+
   it('Should be able to map values', function () {
     let parser = Parser.item()
     parser.mapValues = (c) => c.toUpperCase()
@@ -56,15 +65,33 @@ describe('#parser', function () {
       res.values[0].should.equal('a')
       res.unconsumedStrings[0].should.equal('sd')
     })
+
+    it('Should automatically convert to a result', function () {
+      let res = Parser.item().bind(() => 42).parse('asd')
+
+      res.length.should.equal(1)
+      res.values[0].should.equal(42)
+    })
   })
 
-  it('Should sum two parsers', function () {
-    let parser = Parser.result(42).plus(Parser.item()),
-      res = parser.parse('asd')
+  describe('#plus', function () {
+    it('Should sum two parsers', function () {
+      let parser = Parser.result(42).plus(Parser.item()),
+        res = parser.parse('asd')
 
-    res.length.should.equal(2)
-    res.values[0].should.equal(42)
-    res.values[1].should.equal('a')
+      res.length.should.equal(2)
+      res.values[0].should.equal(42)
+      res.values[1].should.equal('a')
+    })
+
+    it('Should convert non-parser arguments into results', function () {
+      let parser = Parser.item().plus(42),
+        res = parser.parse('asd')
+
+      res.length.should.equal(2)
+      res.values[1].should.equal(42)
+      res.values[0].should.equal('a')
+    })
   })
 
   it('Should satisfy conditions', function () {

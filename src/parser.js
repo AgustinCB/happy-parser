@@ -23,7 +23,6 @@ export default class Parser {
     this.result = new Result()
     this.result = this.process(input)
 
-    //console.log(this.mapValues)
     if (this.mapValues) this.result.values = this.result.values.map(this.mapValues)
 
     return this.result
@@ -44,6 +43,7 @@ export default class Parser {
    * @return {Parser} parser that concatenates the result of the two params
    */
   plus (parser) {
+    if (!(parser instanceof Parser)) parser = Parser.result(parser)
     return new AddedParser(this, parser)
   }
 
@@ -53,7 +53,7 @@ export default class Parser {
    * @return  {Parser}  parser that success in a condition
    */
   satisfy (condition) {
-    return this.bind((input) => condition(input) ? Parser.result(input) : Parser.zero());
+    return this.bind((input) => condition(input) ? input : Parser.zero());
   }
 
   /**
@@ -72,7 +72,7 @@ export default class Parser {
    * @return {Parser}
    */
   many (empty = '') {
-    return this.atLeastOne().plus(Parser.result(empty))
+    return this.atLeastOne().plus(empty)
   }
 
   /**
@@ -89,9 +89,9 @@ export default class Parser {
    */
   startsWith (value, partial = false) {
     const handleResult = (partialValue) => {
-      if (partial) return Parser.result(partialValue)
+      if (partial) return partialValue
 
-      if (partialValue === value) return Parser.result(value)
+      if (partialValue === value) return value
 
       return Parser.zero()
     }
@@ -110,12 +110,12 @@ export default class Parser {
   sepBy (parser, empty = '') {
     return this.bind((head) => {
       let sepParser = parser.bind((_) =>
-        this.bind((next) => Parser.result(next))
+        this.bind((next) => next)
       )
       return sepParser.many().bind((tail) =>
-        Parser.result(util.toArray(head).concat(tail))
+        util.toArray(head).concat(tail)
       )
-    }).plus(Parser.result(empty))
+    }).plus(empty)
   }
 
   /**
@@ -128,7 +128,33 @@ export default class Parser {
     return left.bind((_) =>
             this.bind((res) =>
               right.bind((_) =>
-                Parser.result(res))))
+                res)))
+  }
+
+  /**
+   * Returns a parser that checks for this parser to be chained with an operation
+   * @param  {Parser}   operation - operation to chain with the parser
+   * @return {Parser}
+   */
+  chain (operation) {
+    let rest = (x) => operation.bind((f) => 
+      this.bind((y) => rest(f(x, y)))
+    ).plus(x)
+
+    return this.bind(rest)
+  }
+
+  /**
+   * Returns a parser that checks for this parser to be chained to the right with an operation
+   * @param  {Parser}   operation - operation to chain with the parser
+   * @return {Parser}
+   */
+  chainRight (operation) {
+    let rest = (x) => operation.bind((f) =>
+      this.chainRight(operation).bind((y) => f(x, y))
+    ).plus(x)
+
+    return this.bind(rest)
   }
 }
 
@@ -157,6 +183,19 @@ Parser.zero = function () {
 Parser.item = function () {
   return new ItemParser()
 }
+
+/**
+ * lazy
+ * Returns a parser that will be defined on execution time
+ */
+Parser.lazy = (fn) => Parser.zero().bind(fn, true)
+
+/**
+ * Operators
+ * Creates a parser for a list of operators
+ */
+Parser.operators = (ops) => 
+      ops.reduce((parser, next) => parser.plus(next[0].bind(() => next[1])), Parser.zero())
 
 // Basic parsers
 
@@ -214,14 +253,23 @@ class BindedParser extends Parser {
 
   process (input) {
     let firstResult = this.parser.parse(input),
-      nextParser = this.cb.bind(this)
+      nextParserFn = this.parserifyCb()
 
-    if (this.alwaysCheckSecond && !firstResult.length) return nextParser('').parse(input)
+    if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('').parse(input)
 
     for (let [ value, string ] of firstResult) {
-      this.result = this.result.concat(nextParser(value).parse(string))
+      this.result = this.result.concat(nextParserFn(value).parse(string))
     }
     return this.result
+  }
+
+  parserifyCb () {
+    return (value) => {
+      let nextParser = this.cb.bind(this)(value)
+      if (!(nextParser instanceof Parser)) nextParser = Parser.result(nextParser)
+
+      return nextParser
+    }
   }
 }
 

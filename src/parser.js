@@ -136,12 +136,15 @@ export default class Parser {
    * @param  {Parser}   operation - operation to chain with the parser
    * @return {Parser}
    */
-  chain (operation) {
+  chain (operation, def) {
     let rest = (x) => operation.bind((f) => 
       this.bind((y) => rest(f(x, y)))
     ).plus(x)
 
-    return this.bind(rest)
+    let parser = this.bind(rest)
+
+    if (def !== undefined) return parser.plus(def)
+    return parser
   }
 
   /**
@@ -149,12 +152,15 @@ export default class Parser {
    * @param  {Parser}   operation - operation to chain with the parser
    * @return {Parser}
    */
-  chainRight (operation) {
+  chainRight (operation, def) {
     let rest = (x) => operation.bind((f) =>
       this.chainRight(operation).bind((y) => f(x, y))
     ).plus(x)
 
-    return this.bind(rest)
+    let parser = this.bind(rest)
+
+    if (def) return parser.plus(def)
+    return parser
   }
 }
 
@@ -194,8 +200,10 @@ Parser.lazy = (fn) => Parser.zero().bind(fn, true)
  * Operators
  * Creates a parser for a list of operators
  */
-Parser.operators = (ops) => 
-      ops.reduce((parser, next) => parser.plus(next[0].bind(() => next[1])), Parser.zero())
+Parser.operations = function () {
+  return [...arguments].reduce((parser, next) =>
+      parser.plus(next[0].bind(() => next[1])), Parser.zero())
+}
 
 // Basic parsers
 

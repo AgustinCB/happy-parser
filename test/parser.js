@@ -1,5 +1,6 @@
 import chai from 'chai'
 import Parser from '../lib/parser'
+import * as parsec from '../lib/main'
 
 const should = chai.should()
 
@@ -39,6 +40,18 @@ describe('#parser', function () {
 
     res.length.should.equal(1)
     res.values[0].should.equal('a')
+  })
+
+  it('Should create a parser of multiple operations', function () {
+    let op1 = (x) => x, op2 = (y) => y
+    let parser = Parser.operations([ parsec.CHAR('x'), op1 ], [ parsec.CHAR('y'), op2 ]),
+      res1 = parser.parse('x'), res2 = parser.parse('y'), res3 = parser.parse('z')
+
+    res1.length.should.equal(1)
+    res1.values[0].should.equal(op1)
+    res2.length.should.equal(1)
+    res2.values[0].should.equal(op2)
+    res3.length.should.equal(0)
   })
 
   it('Should be able to map values', function () {
@@ -194,5 +207,46 @@ describe('#parser', function () {
     res.values[0].should.equal('A')
 
     res2.length.should.equal(0)
+  })
+
+  describe('#chain', function () {
+    const rest = (x, y) => x-y, sum = (x, y) => x+y
+    let op = Parser.operations([ parsec.CHAR('+'), sum ], [ parsec.CHAR('-'), rest ])
+    let expr = parsec.INT.chain(op)
+    it('Should chain parsers', function () {
+      let res = expr.parse('2+3-4')
+
+      res.length.should.equal(3)
+      res.values[0].should.equal(1)
+    })
+
+    it('Should return default value on empty', function () {
+      let defExpr = parsec.INT.chain(op, 0),
+        res = defExpr.parse('a')
+
+      res.length.should.equal(1)
+      res.values[0].should.equal(0)
+    })
+  })
+
+  describe('#chainRight', function () {
+    const range = (r) => Array.apply(0, Array(r)).map((x, y) => y)
+    const pow = (x, y) => range(y).reduce((acc, next) => acc * x, 1)
+    let expOp = Parser.operations([ parsec.CHAR('^'), pow ])
+    it('Should chain parsers', function () {
+      let term = parsec.INT.chainRight(expOp)
+      let res = term.parse('2^2^3')
+
+      res.length.should.equal(3)
+      res.values[0].should.equal(256)
+    })
+
+    it('Should return default value on empty', function () {
+      let defTerm = parsec.INT.chain(expOp, 1),
+        res = defTerm.parse('a')
+
+      res.length.should.equal(1)
+      res.values[0].should.equal(1)
+    })
   })
 })

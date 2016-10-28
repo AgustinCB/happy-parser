@@ -7,9 +7,9 @@ let pow = (x, y) => range(y).reduce((acc, next) => acc * x, 1)
 // Sugar to get the integers from 0 to 1
 const range = (r) => Array.apply(0, Array(r)).map((x, y) => y)
 
-let expOp = parsec.Parser.operators([ [ parsec.CHAR('^'), pow ] ])
+let expOp = parsec.Parser.operations([ parsec.CHAR('^'), pow ])
 
-let op = parsec.Parser.operators([ [ parsec.CHAR('+'), sum ], [ parsec.CHAR('-'), rest ] ])
+let op = parsec.Parser.operations([ parsec.CHAR('+'), sum ], [ parsec.CHAR('-'), rest ])
 
 let expr = parsec.Parser.lazy((_) => term.chain(op))
 

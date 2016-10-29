@@ -1,7 +1,7 @@
 {
   "name": "happy-parser",
   "version": "1.0.0",
-  "description": "NPM package boilerplate with tests and babel for ES2015",
+  "description": "Package for easy parsing using a monadic parser combinator",
   "main": "./lib/main",
   "scripts": {
     "test": "chmod +x test.sh; ./test.sh",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AgustinCB/jsparsec.git"
+    "url": "git+https://github.com/AgustinCB/happy-parser.git"
   },
   "keywords": [
     "nomads",
@@ -20,9 +20,9 @@
   "author": "AgustinCB",
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/AgustinCB/jsparsec/issues"
+    "url": "https://github.com/AgustinCB/happy-parser/issues"
   },
-  "homepage": "https://github.com/AgustinCB/jsparsec#readme",
+  "homepage": "https://github.com/AgustinCB/happy-parser#readme",
   "devDependencies": {
     "babel-cli": "^6.14.0",
     "babel-core": "^6.14.0",

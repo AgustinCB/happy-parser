@@ -44,7 +44,7 @@ describe('#parser', function () {
 
   it('Should create a parser of multiple operations', function () {
     let op1 = (x) => x, op2 = (y) => y
-    let parser = Parser.operations([ parsec.CHAR('x'), op1 ], [ parsec.CHAR('y'), op2 ]),
+    let parser = Parser.operations([ parsec.char('x'), op1 ], [ parsec.char('y'), op2 ]),
       res1 = parser.parse('x'), res2 = parser.parse('y'), res3 = parser.parse('z')
 
     res1.length.should.equal(1)
@@ -55,16 +55,15 @@ describe('#parser', function () {
   })
 
   it('Should be able to map values', function () {
-    let parser = Parser.item()
-    parser.mapValues = (c) => c.toUpperCase()
+    let parser = Parser.item().map((c) => c.toUpperCase())
 
     parser.parse('asd').values[0].should.equal('A')
   })
 
-  describe('#bind', function () {
-    it('Should bind two parsers', function () {
+  describe('#then', function () {
+    it('Should then two parsers', function () {
       let parser = Parser.item(),
-        res = parser.bind(Parser.item).parse('asd')
+        res = parser.then(Parser.item).parse('asd')
 
       res.length.should.equal(1)
       res.values[0].should.equal('s')
@@ -72,7 +71,7 @@ describe('#parser', function () {
     })
 
     it('Should always go to the second parser on requested', function () {
-      let res = Parser.zero().bind(Parser.item, true).parse('asd')
+      let res = Parser.zero().then(Parser.item, true).parse('asd')
 
       res.length.should.equal(1)
       res.values[0].should.equal('a')
@@ -80,31 +79,46 @@ describe('#parser', function () {
     })
 
     it('Should automatically convert to a result', function () {
-      let res = Parser.item().bind(() => 42).parse('asd')
+      let res = Parser.item().then(() => 42).parse('asd')
 
       res.length.should.equal(1)
       res.values[0].should.equal(42)
     })
   })
 
-  describe('#plus', function () {
+  describe('#or', function () {
     it('Should sum two parsers', function () {
-      let parser = Parser.result(42).plus(Parser.item()),
-        res = parser.parse('asd')
+      let parser = Parser.result(42).or(Parser.item()),
+        res = parser.parse('asd'),
+        res2 = parser.parse('')
 
-      res.length.should.equal(2)
+      res.length.should.equal(1)
       res.values[0].should.equal(42)
-      res.values[1].should.equal('a')
+      res2.length.should.equal(1)
+      res2.values[0].should.equal(42)
     })
 
     it('Should convert non-parser arguments into results', function () {
-      let parser = Parser.item().plus(42),
-        res = parser.parse('asd')
+      let parser = Parser.item().or(42),
+        res = parser.parse('asd'),
+        res2 = parser.parse('')
 
-      res.length.should.equal(2)
-      res.values[1].should.equal(42)
+      res.length.should.equal(1)
       res.values[0].should.equal('a')
+      res2.length.should.equal(1)
+      res2.values[0].should.equal(42)
     })
+  })
+
+  it('Should filter conditions', function () {
+    let parser = Parser.item().filter((c) => c < 4),
+      res = parser.parse([ 1, 5, 7 ]),
+      res1 = parser.parse([ 5, 7 ])
+
+    res.length.should.equal(1)
+    res.values[0].should.equal(1)
+
+    res1.length.should.equal(0)
   })
 
   it('Should satisfy conditions', function () {
@@ -118,13 +132,37 @@ describe('#parser', function () {
     res1.length.should.equal(0)
   })
 
+  it('Should be able to be optional', function () {
+    let parser = Parser.item().satisfy((c) => c < 4).orNone(),
+      res = parser.parse([ 1, 5, 7 ]),
+      res1 = parser.parse([ 5, 7 ])
+
+    res.length.should.equal(1)
+    res.values[0].should.equal(1)
+
+    res1.length.should.equal(1)
+    res1.values[0].should.equal('')
+  })
+
+  it('Should be able to be negated', function () {
+    let parser = Parser.item().satisfy((c) => c < 4).not(),
+      res = parser.parse([ 5, 7 ]),
+      res1 = parser.parse([ 1, 2 ])
+
+    res.length.should.equal(1)
+    res.values[0][0].should.equal(5)
+    res.values[0][1].should.equal(7)
+
+    res1.length.should.equal(0)
+  })
+
   it('Should check for more than zero result', function () {
-    let parser = Parser.item().satisfy((c) => c < 4).atLeastOne(),
+    let parser = Parser.item().satisfy((c) => c < 4).many(),
       input = [ 1, 2, 3, 42 ],
       res = parser.parse(input),
       index = 0
 
-    res.length.should.equal(3)
+    res.length.should.equal(1)
     res.values[0].length.should.equal(3)
     res.values[0].forEach((value) => {
       value.should.equal(input[index])
@@ -133,13 +171,13 @@ describe('#parser', function () {
   })
 
   it('Should check for zero or more results', function () {
-    let parser = Parser.item().satisfy((c) => c < 4).many([]),
+    let parser = Parser.item().satisfy((c) => c < 4).manyOrNone([]),
       input = [ 1, 2, 3, 42 ],
       res = parser.parse(input),
       res2 = parser.parse([ 42, 43 ]),
       index = 0
 
-    res.length.should.equal(4)
+    res.length.should.equal(1)
     res.values[0].length.should.equal(3)
     res.values[0].forEach((value) => {
       value.should.equal(input[index])
@@ -151,7 +189,7 @@ describe('#parser', function () {
   })
 
   it('Should check the first item', function () {
-    let parser = Parser.item().firstIs(42),
+    let parser = Parser.item().equals(42),
       res = parser.parse([ 42, 43 ]),
       res2 = parser.parse([ 41, 43 ])
 
@@ -187,11 +225,11 @@ describe('#parser', function () {
   })
 
   it('Should check for items separated by a parser', function () {
-    let parser = Parser.item().firstIs('A').sepBy(Parser.item().firstIs(',')),
+    let parser = Parser.item().equals('A').sepBy(Parser.item().equals(',')),
       res = parser.parse('A,A,A'),
       res2 = parser.parse('asd')
 
-    res.length.should.equal(4)
+    res.length.should.equal(1)
     res.values[0].should.equal('AAA')
 
     res2.length.should.equal(1)
@@ -199,7 +237,7 @@ describe('#parser', function () {
   })
 
   it('Should check for items between a parser', function () {
-    let parser = Parser.item().firstIs('A').between(Parser.item().firstIs(',')),
+    let parser = Parser.item().equals('A').between(Parser.item().equals(',')),
       res = parser.parse(',A,'),
       res2 = parser.parse('asd')
 
@@ -211,17 +249,17 @@ describe('#parser', function () {
 
   describe('#chain', function () {
     const rest = (x, y) => x-y, sum = (x, y) => x+y
-    let op = Parser.operations([ parsec.CHAR('+'), sum ], [ parsec.CHAR('-'), rest ])
-    let expr = parsec.INT.chain(op)
+    let op = Parser.operations([ parsec.char('+'), sum ], [ parsec.char('-'), rest ])
+    let expr = parsec.int.chain(op)
     it('Should chain parsers', function () {
       let res = expr.parse('2+3-4')
 
-      res.length.should.equal(3)
+      res.length.should.equal(1)
       res.values[0].should.equal(1)
     })
 
     it('Should return default value on empty', function () {
-      let defExpr = parsec.INT.chain(op, 0),
+      let defExpr = parsec.int.chain(op, 0),
         res = defExpr.parse('a')
 
       res.length.should.equal(1)
@@ -232,17 +270,17 @@ describe('#parser', function () {
   describe('#chainRight', function () {
     const range = (r) => Array.apply(0, Array(r)).map((x, y) => y)
     const pow = (x, y) => range(y).reduce((acc, next) => acc * x, 1)
-    let expOp = Parser.operations([ parsec.CHAR('^'), pow ])
+    let expOp = Parser.operations([ parsec.char('^'), pow ])
     it('Should chain parsers', function () {
-      let term = parsec.INT.chainRight(expOp)
+      let term = parsec.int.chainRight(expOp)
       let res = term.parse('2^2^3')
 
-      res.length.should.equal(3)
+      res.length.should.equal(1)
       res.values[0].should.equal(256)
     })
 
     it('Should return default value on empty', function () {
-      let defTerm = parsec.INT.chain(expOp, 1),
+      let defTerm = parsec.int.chain(expOp, 1),
         res = defTerm.parse('a')
 
       res.length.should.equal(1)

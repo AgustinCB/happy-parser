@@ -1,10 +1,12 @@
 'use strict'
 
 import Result from './result'
-import ParserClass from './parser'
+import Parser from './parser'
 import * as util from './util'
 
-export const Parser = ParserClass
+export const lazy = Parser.lazy
+
+export const result = Parser.result
 
 // Utils
 
@@ -14,22 +16,26 @@ export const Parser = ParserClass
  * @return  {Parser}  parser that success in a condition
  */
 export const satisfy = (condition) => 
-                          ITEM.bind((input) => condition(input) ? Parser.result(input) : ZERO)
+                          item.then((input) => condition(input) ? result(input) : zero)
 
 // Parsers 
-export const ZERO = Parser.zero()
-export const ITEM = Parser.item()
-export const DIGIT = satisfy((c) => parseInt(c))
-export const LOWER = satisfy((c) => util.isLower(c))
-export const UPPER = satisfy((c) => util.isUpper(c))
-export const LETTER = LOWER.plus(UPPER)
-export const CHAR = (value) => ITEM.firstIs(value)
-export const ALPHANUMERIC = LETTER.plus(DIGIT)
+export const zero = Parser.zero()
+export const item = Parser.item()
+export const digit = satisfy((c) => parseInt(c))
+export const lower = satisfy((c) => util.isLower(c))
+export const upper = satisfy((c) => util.isUpper(c))
+export const letter = lower.or(upper)
+export const symbol = satisfy((c) => !(util.isLower(c) || util.isUpper(c) || util.isSpace(c)))
+export const space = satisfy((c) => util.isSpace(c))
+export const char = (value) => item.equals(value)
+export const alphanumeric = letter.or(digit)
+export const string = (str) => item.manyOrNone().equals(str)
 
-export const NEWORD = LETTER.atLeastOne()
-export const WORD = LETTER.many()
+export const spaces = space.manyOrNone('')
+export const neword = letter.many()
+export const word = letter.manyOrNone()
 
-export const UINT = DIGIT.atLeastOne()
-UINT.mapValues = (v) => parseInt(v)
-export const INT = ITEM.firstIs('-').bind((minus) => 
-                    UINT.bind((number) => Parser.result(parseInt(minus+number))), true)
+export const uint = digit.many()
+uint.mapValues = (v) => parseInt(v)
+export const int = item.equals('-').then((minus) => 
+                    uint.then((number) => result(parseInt(minus+number))), true)

@@ -19,6 +19,11 @@ export default class Parser {
     this.mapValues = false
   }
 
+  map (mapValues) {
+    this.mapValues = mapValues
+    return this
+  }
+
   parse (input) {
     this.result = new Result()
     this.result = this.process(input)
@@ -28,13 +33,23 @@ export default class Parser {
     return this.result
   }
 
+  orNone (empty = '') {
+    return this.or(empty)
+  }
+
+  not () {
+    return new NegatedParser(this)
+  }
+
   /**
    * Binds two parsers together
-   * @param {Parser}    parser first parser to bind
+   * @param {Parser}    parser first parser to then
    * @return {Function} function that takes a function and returns a parser
    */
-  bind (cb, alwaysCheckSecond) { 
-    return new BindedParser(this, cb, alwaysCheckSecond);
+  then (cb, alwaysCheckSecond) { 
+    if (cb === undefined) return Parser.zero()
+    if (!(typeof cb === "function")) cb = () => cb
+    return new BindedParser(this, cb, alwaysCheckSecond)
   }
 
   /**
@@ -42,7 +57,7 @@ export default class Parser {
    * @param {Parser}  parser parser to sum
    * @return {Parser} parser that concatenates the result of the two params
    */
-  plus (parser) {
+  or (parser) {
     if (!(parser instanceof Parser)) parser = Parser.result(parser)
     return new AddedParser(this, parser)
   }
@@ -53,7 +68,11 @@ export default class Parser {
    * @return  {Parser}  parser that success in a condition
    */
   satisfy (condition) {
-    return this.bind((input) => condition(input) ? input : Parser.zero());
+    return this.then((input) => condition(input) ? input : Parser.zero())
+  }
+
+  filter (condition) {
+    return this.satisfy(condition)
   }
 
   /**
@@ -61,9 +80,9 @@ export default class Parser {
    * @return  {Parser}
    * 
    */
-  atLeastOne () {
-    return this.bind((c) => 
-            this.many().bind((c1) => 
+  many () {
+    return this.then((c) => 
+            this.manyOrNone().then((c1) => 
                Parser.result(util.toArray(c).concat(util.toArray(c1)))))
   }
 
@@ -71,15 +90,15 @@ export default class Parser {
    * Returns a parser to check that input has 0+ elements of this parser
    * @return {Parser}
    */
-  many (empty = '') {
-    return this.atLeastOne().plus(empty)
+  manyOrNone (empty = '') {
+    return this.many().or(empty)
   }
 
   /**
    * Returns a parser to check that the first item is a given value
    * @return {Parser}
    */
-  firstIs (value) {
+  equals (value) {
     return this.satisfy((input) => value === input)
   }
 
@@ -98,8 +117,8 @@ export default class Parser {
 
     if (!value.length) return Parser.zero()
 
-    return this.firstIs(value[0]).bind((head) =>
-            this.startsWith(value.slice(1)).bind((tail) =>
+    return this.equals(value[0]).then((head) =>
+            this.startsWith(value.slice(1)).then((tail) =>
               handleResult(head+tail), true))
   }
 
@@ -108,14 +127,14 @@ export default class Parser {
    * @return {Parser}
    */
   sepBy (parser, empty = '') {
-    return this.bind((head) => {
-      let sepParser = parser.bind((_) =>
-        this.bind((next) => next)
+    return this.then((head) => {
+      let sepParser = parser.then((_) =>
+        this.then((next) => next)
       )
-      return sepParser.many().bind((tail) =>
+      return sepParser.manyOrNone().then((tail) =>
         util.toArray(head).concat(tail)
       )
-    }).plus(empty)
+    }).or(empty)
   }
 
   /**
@@ -125,9 +144,9 @@ export default class Parser {
   between (left, right) {
     if (!right) right = left
 
-    return left.bind((_) =>
-            this.bind((res) =>
-              right.bind((_) =>
+    return left.then((_) =>
+            this.then((res) =>
+              right.then((_) =>
                 res)))
   }
 
@@ -137,13 +156,13 @@ export default class Parser {
    * @return {Parser}
    */
   chain (operation, def) {
-    let rest = (x) => operation.bind((f) => 
-      this.bind((y) => rest(f(x, y)))
-    ).plus(x)
+    let rest = (x) => operation.then((f) => 
+      this.then((y) => rest(f(x, y)))
+    ).or(x)
 
-    let parser = this.bind(rest)
+    let parser = this.then(rest)
 
-    if (def !== undefined) return parser.plus(def)
+    if (def !== undefined) return parser.or(def)
     return parser
   }
 
@@ -153,13 +172,13 @@ export default class Parser {
    * @return {Parser}
    */
   chainRight (operation, def) {
-    let rest = (x) => operation.bind((f) =>
-      this.chainRight(operation).bind((y) => f(x, y))
-    ).plus(x)
+    let rest = (x) => operation.then((f) =>
+      this.chainRight(operation).then((y) => f(x, y))
+    ).or(x)
 
-    let parser = this.bind(rest)
+    let parser = this.then(rest)
 
-    if (def) return parser.plus(def)
+    if (def) return parser.or(def)
     return parser
   }
 }
@@ -194,7 +213,7 @@ Parser.item = function () {
  * lazy
  * Returns a parser that will be defined on execution time
  */
-Parser.lazy = (fn) => Parser.zero().bind(fn, true)
+Parser.lazy = (fn) => Parser.zero().then(fn, true)
 
 /**
  * Operators
@@ -202,7 +221,7 @@ Parser.lazy = (fn) => Parser.zero().bind(fn, true)
  */
 Parser.operations = function () {
   return [...arguments].reduce((parser, next) =>
-      parser.plus(next[0].bind(() => next[1])), Parser.zero())
+      parser.or(next[0].then(() => next[1])), Parser.zero())
 }
 
 // Basic parsers
@@ -248,8 +267,8 @@ class ResultParser extends Parser {
 }
 
 /**
- * Binded parser
- * Returns the result of binding two parsers
+ * thened parser
+ * Returns the result of thening two parsers
  */
 class BindedParser extends Parser {
   constructor (parser, cb, alwaysCheckSecond = false) {
@@ -293,7 +312,22 @@ class AddedParser extends Parser {
   }
 
   process (input) {
-    return this.parser1.parse(input)
-      .concat(this.parser2.parse(input))
+    let res1 = this.parser1.parse(input)
+
+    if (res1.length) return res1
+    return res1.concat(this.parser2.parse(input))
+  }
+}
+
+class NegatedParser extends Parser {
+  constructor (parser) {
+    super()
+    this.parser = parser
+  }
+
+  process(input) {
+    let res = this.parser.process(input)
+    if (res.length) return this.result
+    return this.result.push(input, input)
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "jsparsec",
+  "name": "happy-parser",
   "version": "1.0.0",
   "description": "NPM package boilerplate with tests and babel for ES2015",
   "main": "./lib/main",

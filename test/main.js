@@ -12,6 +12,10 @@ describe('#main', function () {
     jsparser.result.should.be.ok
   })
 
+  it('Should contain a Parser object', function () {
+    jsparser.Parser.should.be.ok
+  })
+
   it('Should contain a satisfy helper', function () {
     let parser = jsparser.satisfy((c) => c < 4),
       res = parser.parse([ 1, 5, 7 ]),
@@ -99,5 +103,9 @@ describe('#main', function () {
     jsparser.int.parse('123').values[0].should.equal(123)
     jsparser.int.parse('-123').values[0].should.equal(-123)
     jsparser.int.parse('asd').length.should.equal(0)
+  })
+
+  it('Should contain a parser for spaces', function () {
+    jsparser.spaces.parse(' \t\n').length.should.equal(1)
   })
 })

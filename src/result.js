@@ -67,7 +67,7 @@ export default class Result {
    * @return {Array}
    */
   filter (fn) {
-    let newEntries = this.entries().filter((pair) => fn.bind(this, ...pair)()),
+    const newEntries = this.entries().filter((pair) => fn.bind(this, ...pair)()),
       res = new Result()
 
     newEntries.forEach((pair) => res.push(...pair))
@@ -103,7 +103,7 @@ export default class Result {
 }
 
 Result.copy = (copyFrom) => {
-  let result = new Result()
+  const result = new Result()
 
   result.values = copyFrom.values.slice(0)
   result.unconsumedStrings = copyFrom.unconsumedStrings.slice(0)

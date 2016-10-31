@@ -57,9 +57,11 @@ export default class Parser {
    * @param {Parser}  parser parser to sum
    * @return {Parser} parser that concatenates the result of the two params
    */
-  or (parser) {
-    if (!(parser instanceof Parser)) parser = Parser.result(parser)
-    return new AddedParser(this, parser)
+  or () {
+    return [...arguments].reduce((parser, or) => {
+      if (!(or instanceof Parser)) or = Parser.result(or)
+      return new AddedParser(parser, or)
+    }, this)
   }
 
   /**
@@ -128,7 +130,7 @@ export default class Parser {
    */
   sepBy (parser, empty = '') {
     return this.then((head) => {
-      let sepParser = parser.then((_) =>
+      const sepParser = parser.then((_) =>
         this.then((next) => next)
       )
       return sepParser.manyOrNone().then((tail) =>
@@ -156,11 +158,11 @@ export default class Parser {
    * @return {Parser}
    */
   chain (operation, def) {
-    let rest = (x) => operation.then((f) => 
+    const rest = (x) => operation.then((f) => 
       this.then((y) => rest(f(x, y)))
     ).or(x)
 
-    let parser = this.then(rest)
+    const parser = this.then(rest)
 
     if (def !== undefined) return parser.or(def)
     return parser
@@ -172,14 +174,18 @@ export default class Parser {
    * @return {Parser}
    */
   chainRight (operation, def) {
-    let rest = (x) => operation.then((f) =>
+    const rest = (x) => operation.then((f) =>
       this.chainRight(operation).then((y) => f(x, y))
     ).or(x)
 
-    let parser = this.then(rest)
+    const parser = this.then(rest)
 
     if (def) return parser.or(def)
     return parser
+  }
+
+  tokenify (junk = Parser.junk) {
+    return this.between(junk)
   }
 }
 
@@ -279,12 +285,12 @@ class BindedParser extends Parser {
   }
 
   process (input) {
-    let firstResult = this.parser.parse(input),
+    const firstResult = this.parser.parse(input),
       nextParserFn = this.parserifyCb()
 
     if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('').parse(input)
 
-    for (let [ value, string ] of firstResult) {
+    for (const [ value, string ] of firstResult) {
       this.result = this.result.concat(nextParserFn(value).parse(string))
     }
     return this.result
@@ -312,7 +318,7 @@ class AddedParser extends Parser {
   }
 
   process (input) {
-    let res1 = this.parser1.parse(input)
+    const res1 = this.parser1.parse(input)
 
     if (res1.length) return res1
     return res1.concat(this.parser2.parse(input))
@@ -326,7 +332,7 @@ class NegatedParser extends Parser {
   }
 
   process(input) {
-    let res = this.parser.process(input)
+    const res = this.parser.process(input)
     if (res.length) return this.result
     return this.result.push(input, input)
   }

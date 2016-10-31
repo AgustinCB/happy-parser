@@ -2,7 +2,10 @@
 
 import Result from './result'
 import Parser from './parser'
+export { default as Parser } from './parser'
 import * as util from './util'
+
+//export const ParserClass = Parser
 
 export const lazy = Parser.lazy
 
@@ -34,6 +37,8 @@ export const string = (str) => item.manyOrNone().equals(str)
 export const spaces = space.manyOrNone('')
 export const neword = letter.many()
 export const word = letter.manyOrNone()
+
+Parser.junk = spaces
 
 export const uint = digit.many()
 uint.mapValues = (v) => parseInt(v)

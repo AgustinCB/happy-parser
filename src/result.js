@@ -14,8 +14,9 @@ export default class Result {
 
   /**
    * Adds a new set (parser, unconsumedString) into the collection
-   * @param  {Object}   parser resulting parser
-   * @param  {String}   unconsumedString unconsumed string
+   * @param  {Object} parser resulting parser
+   * @param  {String} unconsumedString unconsumed string
+   * @return {Result} this result
    */
   push (value, unconsumedString) {
     this.values.push(value)
@@ -25,7 +26,8 @@ export default class Result {
 
   /**
    * Concatenates two results
-   * @param  {Result}   result result to concatenate
+   * @param  {Result} result result to concatenate
+   * @return {Result} this result
    */
   concat (result) {
     return result.reduce((prev, value, string) => prev.push(value, string), Result.copy(this))
@@ -41,6 +43,7 @@ export default class Result {
 
   /**
    * Iterates a result using a function
+   * @param  {Function} fn function to iterate results
    */
   forEach (fn) {
     this.entries().forEach((pair) => fn(...pair))
@@ -48,6 +51,7 @@ export default class Result {
 
   /**
    * Returns an array resulting of operation item by item in the result
+   * @param  {Function} fn function to map results
    * @return {Array}
    */
   map (fn) {
@@ -56,6 +60,8 @@ export default class Result {
 
   /**
    * Reduce a result using an initial value and an operation
+   * @param  {Function} fn function to reduce results
+   * @param  {Mixed}    initialValue initial value of the reduce operation
    * @return {Array}
    */
   reduce (fn, initialValue) {
@@ -64,6 +70,7 @@ export default class Result {
 
   /**
    * Filter a result using an operation
+   * @param  {Function} fn function to filter results
    * @return {Array}
    */
   filter (fn) {
@@ -102,6 +109,11 @@ export default class Result {
   }
 }
 
+/**
+ * Adds a new copy of the result
+ * @param  {Result} copyFrom source result
+ * @return {Result} the copied result
+ */
 Result.copy = (copyFrom) => {
   const result = new Result()
 

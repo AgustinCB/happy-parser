@@ -300,7 +300,7 @@ describe('#parser', function () {
   })
 
   it('Should tokenify a parser', function () {
-    const parser = Parser.item().tokenify(),
+    const parser = Parser.item().trim(),
       res = parser.parse('   asd')
 
     res.length.should.equal(1)

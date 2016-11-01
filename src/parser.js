@@ -5,6 +5,7 @@ import * as util from './util'
 
 /**
  * Class representing a parsers
+ * Every class extending this one should have a process method
  */
 export default class Parser {
   /**
@@ -19,11 +20,21 @@ export default class Parser {
     this.mapValues = false
   }
 
+  /**
+   * Maps parsed values
+   * @param {Function}  mapValues - function that mapes the values
+   * @return {Parser}   this parser
+   */
   map (mapValues) {
     this.mapValues = mapValues
     return this
   }
 
+  /**
+   * Parses an input
+   * @param {Iterable}  input - iterable (string, array) with the values to be parsed
+   * @return {Result}   result of the parse
+   */
   parse (input) {
     this.result = new Result()
     this.result = this.process(input)
@@ -33,18 +44,28 @@ export default class Parser {
     return this.result
   }
 
+  /**
+   * Returns a parser for this or empty.
+   * @param {Mixed}   empty - value to be pased in the empty result
+   * @return {Parser} new generated parser
+   */
   orNone (empty = '') {
     return this.or(empty)
   }
 
+  /**
+   * Returns a negated version of this parser
+   * @return {Parser} new generated parser
+   */
   not () {
     return new NegatedParser(this)
   }
 
   /**
-   * Binds two parsers together
-   * @param {Parser}    parser first parser to then
-   * @return {Function} function that takes a function and returns a parser
+   * Returns a parser that then does another parsing
+   * @param {Function}  cb - callback that returns a new parser
+   * @param {Boolean}   alwaysCheckSecond - whether to check or not for the second step on empty.
+   * @return {Parser} new generated parser
    */
   then (cb, alwaysCheckSecond) { 
     if (cb === undefined) return Parser.zero()
@@ -53,9 +74,9 @@ export default class Parser {
   }
 
   /**
-   * Sums this parser to another
-   * @param {Parser}  parser parser to sum
-   * @return {Parser} parser that concatenates the result of the two params
+   * Returns a parser of this parser or another
+   * @param {Array<Parser>}   arguments - list of parsers to or
+   * @return {Parser}         new generated parser
    */
   or () {
     return [...arguments].reduce((parser, or) => {
@@ -65,14 +86,19 @@ export default class Parser {
   }
 
   /**
-   * Creates a parser that success if the result of this parser passes a condition
-   * @param {Function}  condition function that takes an input and returns a boolean
+   * Creates a parser that success if this one passes a condition
+   * @param {Function}  condition - function that takes an input and returns a boolean
    * @return  {Parser}  parser that success in a condition
    */
   satisfy (condition) {
     return this.then((input) => condition(input) ? input : Parser.zero())
   }
 
+  /**
+   * Alias of satisfy
+   * @param {Function}  condition - function that takes an input and returns a boolean
+   * @return  {Parser}  parser that success in a condition
+   */
   filter (condition) {
     return this.satisfy(condition)
   }
@@ -90,6 +116,7 @@ export default class Parser {
 
   /**
    * Returns a parser to check that input has 0+ elements of this parser
+   * @param {Mixed}   empty - value to be pased in the empty result
    * @return {Parser}
    */
   manyOrNone (empty = '') {
@@ -97,7 +124,8 @@ export default class Parser {
   }
 
   /**
-   * Returns a parser to check that the first item is a given value
+   * Returns a parser to check that the item is a given value
+   * @param {Mixed}   value - value to check
    * @return {Parser}
    */
   equals (value) {
@@ -106,6 +134,8 @@ export default class Parser {
 
   /**
    * Returns a parser to checks that the first items are equals to a given value
+   * @param {Mixed}   value - value to check
+   * @param {Boolean} partial - checks for partial success
    * @return {Parser}
    */
   startsWith (value, partial = false) {
@@ -126,6 +156,8 @@ export default class Parser {
 
   /**
    * Returns a parser that checks for various results of this separated by another parser
+   * @param {Parser}  parser - returns the separator
+   * @param {Mixed}   empty - value to be pased in the empty result
    * @return {Parser}
    */
   sepBy (parser, empty = '') {
@@ -141,6 +173,8 @@ export default class Parser {
 
   /**
    * Returns a parser that checks for this parser betweeen other parsers
+   * @param {Parser}  left - parser for the left part
+   * @param {Parser}  right - parser for the right part (optional)
    * @return {Parser}
    */
   between (left, right) {
@@ -154,7 +188,8 @@ export default class Parser {
 
   /**
    * Returns a parser that checks for this parser to be chained with an operation
-   * @param  {Parser}   operation - operation to chain with the parser
+   * @param  {Parser}  operation - operation to chain with the parser
+   * @param  {Mixed}   def - value to be pased in case of empty result
    * @return {Parser}
    */
   chain (operation, def) {
@@ -171,6 +206,7 @@ export default class Parser {
   /**
    * Returns a parser that checks for this parser to be chained to the right with an operation
    * @param  {Parser}   operation - operation to chain with the parser
+   * @param  {Mixed}   def - value to be pased in case of empty result
    * @return {Parser}
    */
   chainRight (operation, def) {
@@ -184,7 +220,12 @@ export default class Parser {
     return parser
   }
 
-  tokenify (junk = Parser.junk) {
+  /**
+   * Returns a parser that checks that strims the results
+   * @param  {Parser} junk - parser with the junk to trim
+   * @return {Parser}
+   */
+  trim (junk = Parser.junk) {
     return this.between(junk)
   }
 }
@@ -194,6 +235,8 @@ export default class Parser {
 /**
  * Result
  * Return always a basic value
+ * @param {Mixed}   value - value of the result
+ * @return {Parser}
  */
 Parser.result = function (value){
   return new ResultParser(value);
@@ -202,6 +245,7 @@ Parser.result = function (value){
 /**
  * Zero
  * Returns the zero parser
+ * @return {Parser}
  */
 Parser.zero = function () {
   return new ZeroParser()
@@ -210,6 +254,7 @@ Parser.zero = function () {
 /** 
  * Item
  * Returns the item parser
+ * @return {Parser}
  */
 Parser.item = function () {
   return new ItemParser()
@@ -218,12 +263,16 @@ Parser.item = function () {
 /**
  * lazy
  * Returns a parser that will be defined on execution time
+ * @param   {Function}  fn - returns a lazy parser
+ * @return  {Parser}
  */
 Parser.lazy = (fn) => Parser.zero().then(fn, true)
 
 /**
  * Operators
  * Creates a parser for a list of operators
+ * @param   {Array<Parser>} arguments - list of parsers
+ * @return  {Parser}
  */
 Parser.operations = function () {
   return [...arguments].reduce((parser, next) =>

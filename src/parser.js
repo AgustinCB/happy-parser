@@ -67,9 +67,11 @@ export default class Parser {
    * @param {Boolean}   alwaysCheckSecond - whether to check or not for the second step on empty.
    * @return {Parser} new generated parser
    */
-  then (cb, alwaysCheckSecond) { 
-    if (cb === undefined) return Parser.zero()
-    if (!(typeof cb === "function")) cb = () => cb
+  then (next, alwaysCheckSecond) { 
+    if (next === undefined) return Parser.zero()
+    const cb = !(typeof next === "function")?
+      () => next :
+      next
     return new BindedParser(this, cb, alwaysCheckSecond)
   }
 

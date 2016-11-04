@@ -150,6 +150,18 @@ describe('#result', function () {
     res.length.should.equal(0)
   })
 
+  it('Should get a result with get', function () {
+    let res = new Result()
+
+    res.push('value', 'string')
+    res.push('value1', 'string1')
+    res.push('value', 'string')
+    res.push('value1', 'string1')
+
+    res.get().should.equal('value')
+    res.get(3).should.equal('value1')
+  })
+
   it('Should iterate an array using for...of construction', function () {
     let res = new Result()
 

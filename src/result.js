@@ -90,6 +90,10 @@ export default class Result {
     this.unconsumedStrings = []
   }
 
+  get (index = 0) {
+    return this.values[index]
+  }
+
   /**
    * returns the collection as an iterable
    * @return  {Array}   list of results

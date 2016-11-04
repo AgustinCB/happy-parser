@@ -24,7 +24,10 @@ export const satisfy = (condition) =>
 // Parsers 
 export const zero = Parser.zero()
 export const item = Parser.item()
-export const digit = satisfy((c) => typeof parseInt(c) === "number")
+export const digit = satisfy((c) => {
+  const v = parseInt(c);
+  return typeof v === "number" && v >= 0 && v <= 9;
+})
 export const lower = satisfy((c) => util.isLower(c))
 export const upper = satisfy((c) => util.isUpper(c))
 export const letter = lower.or(upper)

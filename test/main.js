@@ -108,6 +108,8 @@ describe('#main', function () {
   it('Should be able to parse zero into zero', function () {
     jsparser.uint.parse('0').values[0].should.equal(0)
     jsparser.int.parse('0').values[0].should.equal(0)
+    jsparser.int.trim().many().parse('12 0').values[0][0].should.equal(12)
+    jsparser.int.trim().many().parse('12 0').values[0][1].should.equal(0)
   })
 
   it('Should contain a parser for spaces', function () {

@@ -16,7 +16,7 @@ export const isSpace = (str) =>
   whitespaces.includes(str)
 
 export const toArray = (item) => {
-  if (item && !item.length)
+  if ((item || item === 0) && !item.length)
     return [ item ]
   if (!item)
     return []

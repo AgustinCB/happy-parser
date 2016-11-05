@@ -105,6 +105,11 @@ describe('#main', function () {
     jsparser.int.parse('asd').length.should.equal(0)
   })
 
+  it('Should be able to parse zero into zero', function () {
+    jsparser.uint.parse('0').values[0].should.equal(0)
+    jsparser.int.parse('0').values[0].should.equal(0)
+  })
+
   it('Should contain a parser for spaces', function () {
     jsparser.spaces.parse(' \t\n').length.should.equal(1)
   })

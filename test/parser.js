@@ -67,7 +67,7 @@ describe('#parser', function () {
   })
 
   describe('#then', function () {
-    it('Should then two parsers', function () {
+    it('Should bind two parsers', function () {
       const parser = Parser.item(),
         res = parser.then(Parser.item).parse('asd')
 
@@ -89,6 +89,13 @@ describe('#parser', function () {
 
       res.length.should.equal(1)
       res.values[0].should.equal(42)
+    })
+
+    it('Should return also the input', function () {
+      const res = Parser.item().then((_, input) => {
+        input.should.equal('asd')
+        return 42
+      }).parse('asd')
     })
   })
 

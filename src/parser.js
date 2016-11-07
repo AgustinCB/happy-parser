@@ -324,7 +324,7 @@ class ResultParser extends Parser {
 }
 
 /**
- * thened parser
+ * Binded parser
  * Returns the result of thening two parsers
  */
 class BindedParser extends Parser {
@@ -337,7 +337,7 @@ class BindedParser extends Parser {
 
   process (input) {
     const firstResult = this.parser.parse(input),
-      nextParserFn = this.parserifyCb()
+      nextParserFn = this.parserifyCb(input)
 
     if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('').parse(input)
 
@@ -347,9 +347,9 @@ class BindedParser extends Parser {
     return this.result
   }
 
-  parserifyCb () {
+  parserifyCb (input) {
     return (value) => {
-      let nextParser = this.cb.bind(this)(value)
+      let nextParser = this.cb.bind(this)(value, input)
       if (!(nextParser instanceof Parser)) nextParser = Parser.result(nextParser)
 
       return nextParser

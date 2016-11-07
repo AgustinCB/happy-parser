@@ -23,6 +23,12 @@ describe('#parser', function () {
     res.parse(123).values[0].should.equal(42)
   })
 
+  it('Result should have the input', function () {
+    const res = Parser.result(42)
+
+    res.parse('asd').input.should.equal('asd')
+  })
+
   it('Zero should always return empty', function () {
     Parser.zero().parse('asd').length.should.equal(0)
     Parser.zero().parse(123).length.should.equal(0)

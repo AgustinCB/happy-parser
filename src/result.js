@@ -7,9 +7,10 @@ export default class Result {
   /**
    * Creates the result
    */
-  constructor () {
+  constructor (input = '') {
     this.values = []
     this.unconsumedStrings = []
+    this.input = input
   }
 
   /**

@@ -36,7 +36,7 @@ export default class Parser {
    * @return {Result}   result of the parse
    */
   parse (input) {
-    this.result = new Result()
+    this.result = new Result(input)
     this.result = this.process(input)
 
     if (this.mapValues) this.result.values = this.result.values.map(this.mapValues)

@@ -337,18 +337,18 @@ class BindedParser extends Parser {
 
   process (input) {
     const firstResult = this.parser.parse(input),
-      nextParserFn = this.parserifyCb(input)
+      nextParserFn = this.parserifyCb()
 
-    if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('').parse(input)
+    if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('', input).parse(input)
 
     for (const [ value, string ] of firstResult) {
-      this.result = this.result.concat(nextParserFn(value).parse(string))
+      this.result = this.result.concat(nextParserFn(value, string).parse(string))
     }
     return this.result
   }
 
-  parserifyCb (input) {
-    return (value) => {
+  parserifyCb () {
+    return (value, input) => {
       let nextParser = this.cb.bind(this)(value, input)
       if (!(nextParser instanceof Parser)) nextParser = Parser.result(nextParser)
 

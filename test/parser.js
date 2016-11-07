@@ -93,7 +93,7 @@ describe('#parser', function () {
 
     it('Should return also the input', function () {
       const res = Parser.item().then((_, input) => {
-        input.should.equal('asd')
+        input.should.equal('sd')
         return 42
       }).parse('asd')
     })

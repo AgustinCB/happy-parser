@@ -271,6 +271,18 @@ describe('#parser', function () {
     res2.length.should.equal(0)
   })
 
+  it('Should check the first item between parsers', function () {
+    const parser = Parser.item().startsWith('asd').between(Parser.item().equals(',')),
+      res = parser.parse(',asd,'),
+      res2 = parser.parse([ 41, 43 ])
+
+    console.log(res)
+    res.length.should.equal(1)
+    res.values[0].should.equal('asd')
+
+    res2.length.should.equal(0)
+  })
+
   describe('#chain', function () {
     const rest = (x, y) => x-y, sum = (x, y) => x+y
     const op = Parser.operations([ parsec.char('+'), sum ], [ parsec.char('-'), rest ])

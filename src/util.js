@@ -15,6 +15,9 @@ export const isUpper = (str) => {
 export const isSpace = (str) =>
   whitespaces.includes(str)
 
+export const accumulator = (type) => {
+  return (type === "string") ? "" : []
+}
 export const toArray = (item) => {
   if ((item || item === 0 || item === false) && !item.length)
     return [ item ]

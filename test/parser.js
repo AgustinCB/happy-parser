@@ -194,6 +194,18 @@ describe('#parser', function () {
     })
   })
 
+  it('Should return many arrays instead of one concatenated', function () {
+    const parser = Parser.item().then(Parser.result([ 1, 2 ])).many(),
+      res = parser.parse('asd').get()
+
+    res.length.should.equal(3)
+    res.forEach((value) => {
+      value.length.should.equal(2)
+      value[0].should.equal(1)
+      value[1].should.equal(2)
+    })
+  })
+
   it('Should check for zero or more results', function () {
     const parser = Parser.item().satisfy((c) => c < 4).manyOrNone([]),
       input = [ 1, 2, 3, 42 ],
@@ -276,7 +288,6 @@ describe('#parser', function () {
       res = parser.parse(',asd,'),
       res2 = parser.parse([ 41, 43 ])
 
-    console.log(res)
     res.length.should.equal(1)
     res.values[0].should.equal('asd')
 

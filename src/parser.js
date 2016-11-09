@@ -112,8 +112,15 @@ export default class Parser {
    */
   many () {
     return this.then((c) => 
-            this.manyOrNone().then((c1) => 
-               Parser.result(util.toArray(c).concat(util.toArray(c1)))))
+            this.manyOrNone().then((c1) => {
+              if (!c1) c1 = util.accumulator(typeof c)
+
+              if (typeof c1 === "string") c1 = c + c1
+              else {
+                c1.unshift(c)
+              }
+              return Parser.result(c1)
+            }))
   }
 
   /**

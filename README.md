@@ -12,13 +12,13 @@ const sum = (x, y) => x + y,
       rest = (x, y) => x - y
 
 const
-  termOperations = parsec.Parser.operations([ parsec.char('+'), sum ], [ parsec.char('-'), rest ]),
-  factorOperations = parsec.Parser.operations([ parsec.char('^'), Math.pow.bind() ])
+  termOperations = parsec.Parser.operations([ parsec.char('+'), sum ], [ parsec.char('-'), rest ]).trim(),
+  factorOperations = parsec.Parser.operations([ parsec.char('^'), Math.pow.bind() ]).trim()
 
 const factor = parsec.lazy(() => 
-            parsec.int.trim().or(expr.trim().between(parsec.char('('), parsec.char(')'))).trim()
+            parsec.int.or(expr.between(parsec.char('('), parsec.char(')'))).trim()
           ),
-      term = parsec.lazy(() => factor.chainRight(factorOperations).trim()),
+      term = parsec.lazy(() => factor.chainRight(factorOperations)),
       expr = term.chain(termOperations).trim()
 
 console.log(expr.parse(' 3^2 + (4 - 7) '))

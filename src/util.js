@@ -1,6 +1,6 @@
 'use strict'
 
-const whitespaces = " \n\t\v\f\r"
+const whitespaces = ' \n\t\v\f\r'
 
 export const isLower = (str) => {
   const code = str.charCodeAt(0)
@@ -16,12 +16,14 @@ export const isSpace = (str) =>
   whitespaces.includes(str)
 
 export const accumulator = (type) => {
-  return (type === "string") ? "" : []
+  return (type === 'string') ? '' : []
 }
 export const toArray = (item) => {
-  if ((item || item === 0 || item === false) && !item.length)
+  if ((item || item === 0 || item === false) && !item.length) {
     return [ item ]
-  if (!item)
+  }
+  if (!item) {
     return []
+  }
   return item
 }

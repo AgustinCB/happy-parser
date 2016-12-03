@@ -75,8 +75,8 @@ export default class Result {
    * @return {Array}
    */
   filter (fn) {
-    const newEntries = this.entries().filter((pair) => fn.bind(this, ...pair)()),
-      res = new Result()
+    const newEntries = this.entries().filter((pair) => fn.bind(this, ...pair)())
+    const res = new Result()
 
     newEntries.forEach((pair) => res.push(...pair))
 
@@ -99,9 +99,9 @@ export default class Result {
    * returns the collection as an iterable
    * @return  {Array}   list of results
    */
-  *[Symbol.iterator]() {
-    for (let i in this.values) {
-      yield [this.values[i], this.unconsumedStrings[i]];
+  *[ Symbol.iterator ] () {
+    for (const i in this.values) {
+      yield [this.values[i], this.unconsumedStrings[i]]
     }
   }
 
@@ -110,7 +110,7 @@ export default class Result {
    * @return  {number}   length of the collection
    */
   get length () {
-    return this.values.length;
+    return this.values.length
   }
 }
 

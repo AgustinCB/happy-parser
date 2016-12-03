@@ -67,11 +67,11 @@ export default class Parser {
    * @param {Boolean}   alwaysCheckSecond - whether to check or not for the second step on empty.
    * @return {Parser} new generated parser
    */
-  then (next, alwaysCheckSecond) { 
+  then (next, alwaysCheckSecond) {
     if (next === undefined) return Parser.zero()
-    const cb = !(typeof next === "function")?
-      () => next :
-      next
+    const cb = !(typeof next === 'function')
+      ? () => next
+      : next
     return new BindedParser(this, cb, alwaysCheckSecond)
   }
 
@@ -108,14 +108,13 @@ export default class Parser {
   /**
    * Returns a parser to check that input has at least one element
    * @return  {Parser}
-   * 
    */
   many () {
-    return this.then((c) => 
+    return this.then((c) =>
             this.manyOrNone().then((c1) => {
               if (!c1) c1 = util.accumulator(typeof c)
 
-              if (typeof c1 === "string") c1 = c + c1
+              if (typeof c1 === 'string') c1 = c + c1
               else {
                 c1.unshift(c)
               }
@@ -160,7 +159,7 @@ export default class Parser {
 
     return this.equals(value[0]).then((head) =>
             this.startsWith(value.slice(1)).then((tail) =>
-              handleResult(head+tail), true))
+              handleResult(head + tail), true))
   }
 
   /**
@@ -202,7 +201,7 @@ export default class Parser {
    * @return {Parser}
    */
   chain (operation, def) {
-    const rest = (x) => operation.then((f) => 
+    const rest = (x) => operation.then((f) =>
       this.then((y) => rest(f(x, y)))
     ).or(x)
 
@@ -247,8 +246,8 @@ export default class Parser {
  * @param {Mixed}   value - value of the result
  * @return {Parser}
  */
-Parser.result = function (value){
-  return new ResultParser(value);
+Parser.result = function (value) {
+  return new ResultParser(value)
 }
 
 /**
@@ -260,7 +259,7 @@ Parser.zero = function () {
   return new ZeroParser()
 }
 
-/** 
+/**
  * Item
  * Returns the item parser
  * @return {Parser}
@@ -312,7 +311,7 @@ class ZeroParser extends Parser {
     return this.result
   }
 }
- 
+
 /**
  * Result parser
  * Returns always the same value
@@ -324,9 +323,9 @@ class ResultParser extends Parser {
   }
 
   process (input) {
-    return this.result.push(this.value === undefined ?
-        input :
-        this.value, input)
+    return this.result.push(this.value === undefined
+        ? input
+        : this.value, input)
   }
 }
 
@@ -343,8 +342,8 @@ class BindedParser extends Parser {
   }
 
   process (input) {
-    const firstResult = this.parser.parse(input),
-      nextParserFn = this.parserifyCb()
+    const firstResult = this.parser.parse(input)
+    const nextParserFn = this.parserifyCb()
 
     if (this.alwaysCheckSecond && !firstResult.length) return nextParserFn('', input).parse(input)
 
@@ -389,7 +388,7 @@ class NegatedParser extends Parser {
     this.parser = parser
   }
 
-  process(input) {
+  process (input) {
     const res = this.parser.process(input)
     if (res.length) return this.result
     return this.result.push(input, input)

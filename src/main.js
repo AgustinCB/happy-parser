@@ -1,11 +1,10 @@
 'use strict'
 
-import Result from './result'
 import Parser from './parser'
 export { default as Parser } from './parser'
 import * as util from './util'
 
-//export const ParserClass = Parser
+// export const ParserClass = Parser
 
 export const lazy = Parser.lazy
 
@@ -18,15 +17,15 @@ export const result = Parser.result
  * @param {Function}  condition function that takes an input and returns a boolean
  * @return  {Parser}  parser that success in a condition
  */
-export const satisfy = (condition) => 
+export const satisfy = (condition) =>
                           item.then((input) => condition(input) ? result(input) : zero)
 
-// Parsers 
+// Parsers
 export const zero = Parser.zero()
 export const item = Parser.item()
 export const digit = satisfy((c) => {
-  const v = parseInt(c);
-  return typeof v === "number" && v >= 0 && v <= 9;
+  const v = parseInt(c)
+  return typeof v === 'number' && v >= 0 && v <= 9
 })
 export const lower = satisfy((c) => util.isLower(c))
 export const upper = satisfy((c) => util.isUpper(c))
@@ -45,5 +44,5 @@ Parser.junk = spaces
 
 export const uint = digit.many()
 uint.mapValues = (v) => parseInt(v)
-export const int = item.equals('-').then((minus) => 
-                    uint.then((number) => result(parseInt(minus+number))), true)
+export const int = item.equals('-').then((minus) =>
+                    uint.then((number) => result(parseInt(minus + number))), true)

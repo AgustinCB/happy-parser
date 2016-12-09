@@ -194,6 +194,18 @@ describe('#parser', function () {
     })
   })
 
+  it('Should check for more than zero result in an accumulator', function () {
+    const parser = parsec.neword.trim().many(Array),
+      input = "asd asd asd",
+      res = parser.parse(input)
+
+    res.length.should.equal(1)
+    res.values[0].length.should.equal(3)
+    res.values[0].forEach((value) => {
+      value.should.equal("asd")
+    })
+  })
+
   it('Should return many arrays instead of one concatenated', function () {
     const parser = Parser.item().then(Parser.result([ 1, 2 ])).many(),
       res = parser.parse('asd').get()
@@ -207,8 +219,8 @@ describe('#parser', function () {
   })
 
   it('Should check for zero or more results', function () {
-    const parser = Parser.item().satisfy((c) => c < 4).manyOrNone([]),
-      input = [ 1, 2, 3, 42 ],
+    const parser = Parser.item().satisfy((c) => c < 4).manyOrNone([])
+    const input = [ 1, 2, 3, 42 ],
       res = parser.parse(input),
       res2 = parser.parse([ 42, 43 ])
     let index = 0
@@ -220,6 +232,7 @@ describe('#parser', function () {
       index += 1
     })
 
+    console.log(res2, res, Parser.item().satisfy((c) => c < 4).manyOrNone([]).parse([42, 43]))
     res2.length.should.equal(1)
     res2.values[0].length.should.equal(0)
   })

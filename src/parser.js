@@ -109,17 +109,17 @@ export default class Parser {
    * Returns a parser to check that input has at least one element
    * @return  {Parser}
    */
-  many () {
+  many (type) {
     return this.then((c) =>
-            this.manyOrNone().then((c1) => {
-              if (!c1) c1 = util.accumulator(typeof c)
+      this.manyOrNone('', type).then((c1) => {
+        if (!c1) c1 = util.accumulator(typeof c, type)
 
-              if (typeof c1 === 'string') c1 = c + c1
-              else {
-                c1.unshift(c)
-              }
-              return Parser.result(c1)
-            }))
+        if (c1.constructor === String) c1 = c + c1
+        else {
+          c1.unshift(c)
+        }
+        return Parser.result(c1)
+      }))
   }
 
   /**
@@ -127,8 +127,8 @@ export default class Parser {
    * @param {Mixed}   empty - value to be pased in the empty result
    * @return {Parser}
    */
-  manyOrNone (empty = '') {
-    return this.many().or(empty)
+  manyOrNone (empty = '', type) {
+    return this.many(type).or(empty)
   }
 
   /**

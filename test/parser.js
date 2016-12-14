@@ -232,7 +232,6 @@ describe('#parser', function () {
       index += 1
     })
 
-    console.log(res2, res, Parser.item().satisfy((c) => c < 4).manyOrNone([]).parse([42, 43]))
     res2.length.should.equal(1)
     res2.values[0].length.should.equal(0)
   })

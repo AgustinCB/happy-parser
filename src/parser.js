@@ -274,7 +274,7 @@ Parser.item = function () {
  * @param   {Function}  fn - returns a lazy parser
  * @return  {Parser}
  */
-Parser.lazy = (fn) => Parser.zero().then(fn, true)
+Parser.lazy = (fn) => new LazyParser(fn)
 
 /**
  * Operators
@@ -392,5 +392,22 @@ class NegatedParser extends Parser {
     const res = this.parser.process(input)
     if (res.length) return this.result
     return this.result.push(input, input)
+  }
+}
+
+class LazyParser extends Parser {
+  constructor (parserFn) {
+    super()
+    this.parserFn = parserFn
+  }
+
+  getParser () {
+    if (this.parser) return this.parser
+    this.parser = this.parserFn()
+    return this.parser
+  }
+
+  process (input) {
+    return this.getParser().process(input)
   }
 }

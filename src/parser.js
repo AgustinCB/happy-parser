@@ -398,16 +398,10 @@ class NegatedParser extends Parser {
 class LazyParser extends Parser {
   constructor (parserFn) {
     super()
-    this.parserFn = parserFn
-  }
-
-  getParser () {
-    if (this.parser) return this.parser
-    this.parser = this.parserFn()
-    return this.parser
+    this.parserFn = parserFn.bind(this)
   }
 
   process (input) {
-    return this.getParser().process(input)
+    return this.parserFn(input).process(input)
   }
 }

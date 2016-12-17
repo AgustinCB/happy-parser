@@ -376,9 +376,7 @@ class BindedParser extends Parser {
    * @return {Parser}
    */
   copy () {
-    const newParser = Object.assign(new this.constructor(), this)
-    newParser.parser = this.parser.copy()
-    return newParser
+    return new BindedParser(this.parser.copy(), this.cb, this.alwaysCheckSecond)
   }
 }
 
@@ -405,10 +403,7 @@ class AddedParser extends Parser {
    * @return {Parser}
    */
   copy () {
-    const newParser = Object.assign(new this.constructor(), this)
-    newParser.parser1 = this.parser1.copy()
-    newParser.parser2 = this.parser2.copy()
-    return newParser
+    return new AddedParser(this.parser1.copy(), this.parser2.copy())
   }
 }
 
@@ -429,9 +424,7 @@ class NegatedParser extends Parser {
    * @return {Parser}
    */
   copy () {
-    const newParser = Object.assign(new this.constructor(), this)
-    newParser.parser = this.parser.copy()
-    return newParser
+    return new NegatedParser(this.parser.copy())
   }
 }
 
@@ -443,5 +436,9 @@ class LazyParser extends Parser {
 
   process (input) {
     return this.parserFn(input).copy().process(input)
+  }
+
+  copy () {
+    return new LazyParser(this.parserFn)
   }
 }

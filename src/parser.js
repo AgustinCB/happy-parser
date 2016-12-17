@@ -58,7 +58,7 @@ export default class Parser {
    * @return {Parser} new generated parser
    */
   not () {
-    return new NegatedParser(this)
+    return new NegatedParser(this.copy())
   }
 
   /**
@@ -72,7 +72,7 @@ export default class Parser {
     const cb = !(typeof next === 'function')
       ? () => next
       : next
-    return new BindedParser(this, cb, alwaysCheckSecond)
+    return new BindedParser(this.copy(), cb, alwaysCheckSecond)
   }
 
   /**
@@ -83,7 +83,7 @@ export default class Parser {
   or () {
     return [...arguments].reduce((parser, or) => {
       if (!(or instanceof Parser)) or = Parser.result(or)
-      return new AddedParser(parser, or)
+      return new AddedParser(parser.copy(), or.copy())
     }, this)
   }
 
@@ -367,7 +367,7 @@ class BindedParser extends Parser {
       let nextParser = this.cb.bind(this)(value, input)
       if (!(nextParser instanceof Parser)) nextParser = Parser.result(nextParser)
 
-      return nextParser
+      return nextParser.copy()
     }
   }
 }
@@ -398,7 +398,7 @@ class NegatedParser extends Parser {
   }
 
   process (input) {
-    const res = this.parser.process(input)
+    const res = this.parser.copy().process(input)
     if (res.length) return this.result
     return this.result.push(input, input)
   }
@@ -411,6 +411,6 @@ class LazyParser extends Parser {
   }
 
   process (input) {
-    return this.parserFn(input).process(input)
+    return this.parserFn(input).copy().process(input)
   }
 }

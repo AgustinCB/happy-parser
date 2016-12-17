@@ -83,8 +83,8 @@ export default class Parser {
   or () {
     return [...arguments].reduce((parser, or) => {
       if (!(or instanceof Parser)) or = Parser.result(or)
-      return new AddedParser(parser.copy(), or.copy())
-    }, this)
+      return new AddedParser(parser, or.copy())
+    }, this.copy())
   }
 
   /**
@@ -370,6 +370,16 @@ class BindedParser extends Parser {
       return nextParser.copy()
     }
   }
+
+  /**
+   * Returns a copy of the current parser
+   * @return {Parser}
+   */
+  copy () {
+    const newParser = Object.assign(new this.constructor(), this)
+    newParser.parser = this.parser.copy()
+    return newParser
+  }
 }
 
 /**
@@ -389,6 +399,17 @@ class AddedParser extends Parser {
     if (res1.length) return res1
     return res1.concat(this.parser2.parse(input))
   }
+
+  /**
+   * Returns a copy of the current parser
+   * @return {Parser}
+   */
+  copy () {
+    const newParser = Object.assign(new this.constructor(), this)
+    newParser.parser1 = this.parser1.copy()
+    newParser.parser2 = this.parser2.copy()
+    return newParser
+  }
 }
 
 class NegatedParser extends Parser {
@@ -401,6 +422,16 @@ class NegatedParser extends Parser {
     const res = this.parser.copy().process(input)
     if (res.length) return this.result
     return this.result.push(input, input)
+  }
+
+  /**
+   * Returns a copy of the current parser
+   * @return {Parser}
+   */
+  copy () {
+    const newParser = Object.assign(new this.constructor(), this)
+    newParser.parser = this.parser.copy()
+    return newParser
   }
 }
 

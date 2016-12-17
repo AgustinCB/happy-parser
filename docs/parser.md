@@ -1,7 +1,7 @@
 # Class: Parser
 Creates a parser
 
-## (new Parser()).map(mapValues) 
+## (new Parser()).map(mapValues)
 
 Maps parsed values
 
@@ -11,7 +11,7 @@ Maps parsed values
 
 **Returns**: `Parser`, this parser
 
-## (new Parser()).parse(input) 
+## (new Parser()).parse(input)
 
 Parses an input
 
@@ -21,7 +21,7 @@ Parses an input
 
 **Returns**: `Result`, result of the parse
 
-## (new Parser()).orNone(empty) 
+## (new Parser()).orNone(empty)
 
 Returns a parser for this or empty.
 
@@ -31,13 +31,13 @@ Returns a parser for this or empty.
 
 **Returns**: `Parser`, new generated parser
 
-## (new Parser()).not() 
+## (new Parser()).not()
 
 Returns a negated version of this parser
 
 **Returns**: `Parser`, new generated parser
 
-## (new Parser()).then(cb, alwaysCheckSecond) 
+## (new Parser()).then(cb, alwaysCheckSecond)
 
 Returns a parser that then does another parsing
 
@@ -49,7 +49,7 @@ Returns a parser that then does another parsing
 
 **Returns**: `Parser`, new generated parser
 
-## (new Parser()).or(arguments) 
+## (new Parser()).or(arguments)
 
 Returns a parser of this parser or another
 
@@ -59,7 +59,7 @@ Returns a parser of this parser or another
 
 **Returns**: `Parser`, new generated parser
 
-## (new Parser()).satisfy(condition) 
+## (new Parser()).satisfy(condition)
 
 Creates a parser that success if this one passes a condition
 
@@ -69,7 +69,7 @@ Creates a parser that success if this one passes a condition
 
 **Returns**: `Parser`, parser that success in a condition
 
-## (new Parser()).filter(condition) 
+## (new Parser()).filter(condition)
 
 Alias of satisfy
 
@@ -79,13 +79,13 @@ Alias of satisfy
 
 **Returns**: `Parser`, parser that success in a condition
 
-## (new Parser()).many() 
+## (new Parser()).many()
 
 Returns a parser to check that input has at least one element
 
 **Returns**: `Parser`
 
-## (new Parser()).manyOrNone(empty) 
+## (new Parser()).manyOrNone(empty)
 
 Returns a parser to check that input has 0+ elements of this parser
 
@@ -95,7 +95,7 @@ Returns a parser to check that input has 0+ elements of this parser
 
 **Returns**: `Parser`
 
-## (new Parser()).equals(value) 
+## (new Parser()).equals(value)
 
 Returns a parser to check that the item is a given value
 
@@ -105,7 +105,7 @@ Returns a parser to check that the item is a given value
 
 **Returns**: `Parser`
 
-## (new Parser()).startsWith(value, partial) 
+## (new Parser()).startsWith(value, partial)
 
 Returns a parser to checks that the first items are equals to a given value
 
@@ -117,7 +117,7 @@ Returns a parser to checks that the first items are equals to a given value
 
 **Returns**: `Parser`
 
-## (new Parser()).sepBy(parser, empty) 
+## (new Parser()).sepBy(parser, empty)
 
 Returns a parser that checks for various results of this separated by another parser
 
@@ -129,7 +129,7 @@ Returns a parser that checks for various results of this separated by another pa
 
 **Returns**: `Parser`
 
-## (new Parser()).between(left, right) 
+## (new Parser()).between(left, right)
 
 Returns a parser that checks for this parser betweeen other parsers
 
@@ -141,7 +141,7 @@ Returns a parser that checks for this parser betweeen other parsers
 
 **Returns**: `Parser`
 
-## (new Parser()).chain(operation, def) 
+## (new Parser()).chain(operation, def)
 
 Returns a parser that checks for this parser to be chained with an operation
 
@@ -153,7 +153,7 @@ Returns a parser that checks for this parser to be chained with an operation
 
 **Returns**: `Parser`
 
-## (new Parser()).chainRight(operation, def) 
+## (new Parser()).chainRight(operation, def)
 
 Returns a parser that checks for this parser to be chained to the right with an operation
 
@@ -165,7 +165,7 @@ Returns a parser that checks for this parser to be chained to the right with an 
 
 **Returns**: `Parser`
 
-## (new Parser()).trim(junk) 
+## (new Parser()).trim(junk)
 
 Returns a parser that checks that strims the results
 
@@ -175,7 +175,13 @@ Returns a parser that checks that strims the results
 
 **Returns**: `Parser`
 
-## Parser.result(value) 
+## (new Parser()).copy()
+
+Returns a copy of the current parser
+
+**Returns**: `Parser`
+
+## Parser.result(value)
 
 Result
 Return always a basic value
@@ -186,21 +192,21 @@ Return always a basic value
 
 **Returns**: `Parser`
 
-## Parser.zero() 
+## Parser.zero()
 
 Zero
 Returns the zero parser
 
 **Returns**: `Parser`
 
-## Parser.item() 
+## Parser.item()
 
 Item
 Returns the item parser
 
 **Returns**: `Parser`
 
-## Parser.lazy(fn) 
+## Parser.lazy(fn)
 
 lazy
 Returns a parser that will be defined on execution time
@@ -211,7 +217,7 @@ Returns a parser that will be defined on execution time
 
 **Returns**: `Parser`
 
-## Parser.operations(arguments) 
+## Parser.operations(arguments)
 
 Operators
 Creates a parser for a list of operators
@@ -221,5 +227,3 @@ Creates a parser for a list of operators
 **arguments**: `Array.&lt;Parser&gt;`, list of parsers
 
 **Returns**: `Parser`
-
-* * *

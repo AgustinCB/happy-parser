@@ -206,6 +206,16 @@ describe('#parser', function () {
     })
   })
 
+  it('Should copy a parser', function () {
+    const parser = Parser.item().satisfy((c) => c < 4).not(),
+      parser2 = parser.copy(),
+      res = parser.parse([ 5, 7 ]).get(),
+      res1 = parser2.parse([ 5, 7 ]).get()
+
+    parser.should.not.equal(parser2)
+    res.should.deep.equal(res1)
+  })
+
   it('Should return many arrays instead of one concatenated', function () {
     const parser = Parser.item().then(Parser.result([ 1, 2 ])).many(),
       res = parser.parse('asd').get()

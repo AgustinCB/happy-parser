@@ -236,6 +236,15 @@ export default class Parser {
   trim (junk = Parser.junk) {
     return this.between(junk)
   }
+
+  /**
+   * Returns a copy of the current parser
+   * @return {Parser}
+   */
+  copy () {
+    const newParser = new this.constructor()
+    return Object.assign(newParser, this)
+  }
 }
 
 // Operations

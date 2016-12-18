@@ -1,6 +1,6 @@
 {
   "name": "happy-parser",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "Package for easy parsing using a monadic parser combinator",
   "main": "./lib/main",
   "scripts": {

@@ -58,7 +58,7 @@ export default class Parser {
    * @return {Parser} new generated parser
    */
   not () {
-    return new NegatedParser(this.copy())
+    return new NegatedParser(this)
   }
 
   /**
@@ -72,7 +72,7 @@ export default class Parser {
     const cb = !(typeof next === 'function')
       ? () => next
       : next
-    return new BindedParser(this.copy(), cb, alwaysCheckSecond)
+    return new BindedParser(this, cb, alwaysCheckSecond)
   }
 
   /**
@@ -81,10 +81,12 @@ export default class Parser {
    * @return {Parser}         new generated parser
    */
   or () {
-    return [...arguments].reduce((parser, or) => {
-      if (!(or instanceof Parser)) or = Parser.result(or)
-      return new AddedParser(parser, or.copy())
-    }, this.copy())
+    const parsers = [this, ...arguments].map((parser) => {
+      if (!(parser instanceof Parser)) return Parser.result(parser)
+      return parser
+    })
+
+    return new AddedParser(...parsers)
   }
 
   /**
@@ -385,17 +387,18 @@ class BindedParser extends Parser {
  * Returns the result of adding two parsers
  */
 class AddedParser extends Parser {
-  constructor (parser1, parser2) {
+  constructor () {
     super()
-    this.parser1 = parser1.copy()
-    this.parser2 = parser2.copy()
+    this.parsers = [...arguments].map((parser) => parser.copy())
   }
 
   process (input) {
-    const res1 = this.parser1.parse(input)
-
-    if (res1.length) return res1
-    return res1.concat(this.parser2.parse(input))
+    for (const index in this.parsers) {
+      const parser = this.parsers[index]
+      const res = parser.parse(input)
+      if (res.length) return res
+    }
+    return this.result
   }
 
   /**
@@ -403,7 +406,7 @@ class AddedParser extends Parser {
    * @return {Parser}
    */
   copy () {
-    return new AddedParser(this.parser1, this.parser2)
+    return new AddedParser(...this.parsers)
   }
 }
 

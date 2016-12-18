@@ -345,7 +345,7 @@ class ResultParser extends Parser {
 class BindedParser extends Parser {
   constructor (parser, cb, alwaysCheckSecond = false) {
     super()
-    this.parser = parser
+    this.parser = parser.copy()
     this.cb = cb
     this.alwaysCheckSecond = alwaysCheckSecond
   }
@@ -387,8 +387,8 @@ class BindedParser extends Parser {
 class AddedParser extends Parser {
   constructor (parser1, parser2) {
     super()
-    this.parser1 = parser1
-    this.parser2 = parser2
+    this.parser1 = parser1.copy()
+    this.parser2 = parser2.copy()
   }
 
   process (input) {
@@ -410,11 +410,11 @@ class AddedParser extends Parser {
 class NegatedParser extends Parser {
   constructor (parser) {
     super()
-    this.parser = parser
+    this.parser = parser.copy()
   }
 
   process (input) {
-    const res = this.parser.copy().process(input)
+    const res = this.parser.process(input)
     if (res.length) return this.result
     return this.result.push(input, input)
   }
@@ -434,11 +434,18 @@ class LazyParser extends Parser {
     this.parserFn = parserFn.bind(this)
   }
 
+  getParser () {
+    if (this.parser) return this.parser
+    this.parser = this.parserFn().copy()
+    return this.parser
+  }
+
   process (input) {
-    return this.parserFn(input).copy().process(input)
+    return this.getParser().process(input)
   }
 
   copy () {
+    if (this.parser) return this.parser.copy()
     return new LazyParser(this.parserFn)
   }
 }
